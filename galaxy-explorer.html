@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Galaxy Explorer for Kids</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── CSS VARIABLES ── */
+    :root {
+      --gold:    #fbbf24;
+      --gold2:   #f59e0b;
+      --purple:  #8b5cf6;
+      --purple2: #6d28d9;
+      --cyan:    #22d3ee;
+      --red:     #ef4444;
+      --green:   #22c55e;
+      --bg0:     #030818;
+      --bg1:     #07102a;
+      --bg2:     #0d1b40;
+      --bg3:     #111e4a;
+      --text:    #e2e8f0;
+      --muted:   #94a3b8;
+      --card:    rgba(13,27,64,0.8);
+    }
+
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg0);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── ANIMATED STARFIELD ── */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite var(--delay, 0s);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.1; transform: scale(1); }
+      50%       { opacity: 1;   transform: scale(1.4); }
+    }
+
+    /* ── SHOOTING STARS ── */
+    .shoot {
+      position: absolute;
+      width: 2px;
+      height: 80px;
+      background: linear-gradient(to bottom, white, transparent);
+      transform-origin: top center;
+      animation: shoot var(--sd, 4s) linear infinite var(--sdelay, 0s);
+      opacity: 0;
+    }
+
+    @keyframes shoot {
+      0%   { opacity: 0; transform: translateY(-100px) rotate(35deg); }
+      5%   { opacity: 1; }
+      40%  { opacity: 0; transform: translateY(600px) rotate(35deg); }
+      100% { opacity: 0; transform: translateY(600px) rotate(35deg); }
+    }
+
+    /* ── LAYOUT ── */
+    .wrapper { position: relative; z-index: 1; }
+
+    section, .section {
+      padding: 80px 24px;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    /* ── REVEAL ANIMATION ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── HEADER ── */
+    .hero {
+      position: relative;
+      text-align: center;
+      padding: 100px 24px 80px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,92,246,0.25) 0%, transparent 70%),
+                  linear-gradient(180deg, var(--bg1) 0%, var(--bg0) 100%);
+      border-bottom: 1px solid rgba(139,92,246,0.3);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle 300px at 20% 50%, rgba(34,211,238,0.07) 0%, transparent 70%),
+                  radial-gradient(circle 300px at 80% 50%, rgba(251,191,36,0.07) 0%, transparent 70%);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      border: 1px solid rgba(34,211,238,0.4);
+      padding: 6px 18px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      background: rgba(34,211,238,0.07);
+      animation: fadein 1s ease 0.2s both;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(38px, 7vw, 72px);
+      font-weight: 900;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 20px;
+      animation: fadein 1s ease 0.4s both;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--gold), var(--purple), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto 40px;
+      line-height: 1.8;
+      animation: fadein 1s ease 0.6s both;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadein 1s ease 0.8s both;
+    }
+
+    .btn {
+      display: inline-block;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 14px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #1a0a00;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .btn-secondary:hover { border-color: var(--purple); color: white; }
+
+    /* ── NAV DOTS ── */
+    .nav-dots {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .nav-dot.active {
+      background: var(--gold);
+      transform: scale(1.4);
+    }
+
+    /* ── SECTION LABELS ── */
+    .section-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+
+    h2.section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(24px, 4vw, 38px);
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .section-desc {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 640px;
+      margin-bottom: 10px;
+    }
+
+    hr.divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      margin: 18px 0 36px;
+    }
+
+    /* ── CALLOUT / FUN FACT ── */
+    .fun-fact {
+      background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(34,211,238,0.08));
+      border: 1px solid rgba(139,92,246,0.4);
+      border-left: 4px solid var(--purple);
+      padding: 18px 24px;
+      border-radius: 14px;
+      margin-top: 24px;
+      color: var(--cyan);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.7;
+      backdrop-filter: blur(6px);
+    }
+
+    /* ── GALAXY SECTION BACKGROUND ── */
+    .bg-section {
+      background: linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 50%, var(--bg0) 100%);
+      border-top: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* ── PLANET CARDS ── */
+    .planets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 18px;
+      margin-top: 36px;
+    }
+
+    .planet-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 24px 18px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .planet-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, var(--glow, rgba(255,255,255,0.08)) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .planet-card:hover::before { opacity: 1; }
+
+    .planet-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .planet-card .planet-icon {
+      font-size: 52px;
+      display: block;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 12px var(--glow, rgba(255,255,255,0.3)));
+      transition: transform 0.4s ease;
+    }
+
+    .planet-card:hover .planet-icon {
+      transform: scale(1.15) rotate(8deg);
+    }
+
+    .planet-card h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .planet-card p {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .planet-order {
+      display: inline-block;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 100px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-family: 'Orbitron', monospace;
+      margin-top: 12px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── GALAXY TYPE CARDS ── */
+    .types-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 22px;
+      margin-top: 36px;
+    }
+
+    .type-card {
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid transparent;
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .type-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+
+    .type-card::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      opacity: 0.15;
+      transition: transform 0.4s;
+    }
+    .type-card:hover::after { transform: scale(1.4); }
+
+    .type-card.spiral     { background: linear-gradient(135deg,rgba(109,40,217,0.3),rgba(139,92,246,0.1)); border-color: rgba(139,92,246,0.4); }
+    .type-card.spiral::after { background: var(--purple); }
+    .type-card.elliptical { background: linear-gradient(135deg,rgba(234,88,12,0.3),rgba(249,115,22,0.1)); border-color: rgba(249,115,22,0.4); }
+    .type-card.elliptical::after { background: #f97316; }
+    .type-card.irregular  { background: linear-gradient(135deg,rgba(21,128,61,0.3),rgba(34,197,94,0.1));  border-color: rgba(34,197,94,0.4); }
+    .type-card.irregular::after { background: var(--green); }
+
+    .type-card .type-icon { font-size: 44px; margin-bottom: 14px; display: block; }
+
+    .type-card h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .type-card p { font-size: 14px; color: var(--muted); line-height: 1.75; }
+
+    /* ── QUIZ ── */
+    .quiz-shell {
+      max-width: 640px;
+      margin: 36px auto 0;
+    }
+
+    .quiz-progress-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    .quiz-box {
+      background: linear-gradient(135deg, rgba(17,30,74,0.9), rgba(13,27,64,0.95));
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: 24px;
+      padding: 36px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .quiz-score-badge {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      color: var(--gold);
+      background: rgba(251,191,36,0.1);
+      border: 1px solid rgba(251,191,36,0.3);
+      padding: 6px 14px;
+      border-radius: 100px;
+    }
+
+    .quiz-counter {
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    #quiz-question {
+      font-size: 21px;
+      font-weight: 800;
+      margin-bottom: 26px;
+      color: white;
+      min-height: 56px;
+      line-height: 1.4;
+      transition: opacity 0.3s;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .quiz-opt {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      line-height: 1.4;
+    }
+
+    .quiz-opt:hover:not(:disabled) {
+      background: rgba(139,92,246,0.15);
+      border-color: rgba(139,92,246,0.5);
+      transform: scale(1.02);
+    }
+
+    .quiz-opt.correct {
+      background: rgba(20,83,45,0.7);
+      border-color: var(--green);
+      color: #86efac;
+      animation: pop 0.3s ease;
+    }
+
+    .quiz-opt.wrong {
+      background: rgba(69,10,10,0.7);
+      border-color: var(--red);
+      color: #fca5a5;
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      40%{ transform: scale(1.05); }
+      100%{ transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    #quiz-feedback {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      min-height: 26px;
+      margin-bottom: 18px;
+      transition: opacity 0.3s;
+    }
+
+    #quiz-next {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a0a00;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      letter-spacing: 0.5px;
+    }
+
+    #quiz-next:hover { opacity: 0.9; transform: translateY(-2px); }
+    #quiz-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── RESULT SCREEN ── */
+    .quiz-result {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .result-stars {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: bounce 0.5s ease 0.2s both;
+    }
+
+    @keyframes bounce {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    .result-score {
+      font-family: 'Orbitron', monospace;
+      font-size: 52px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .result-label {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: white;
+    }
+
+    .result-msg {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* ── FACTS GRID ── */
+    .facts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 36px;
+    }
+
+    .fact-item {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 24px;
+      transition: transform 0.3s, border-color 0.3s;
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fact-item:hover {
+      transform: translateY(-5px);
+      border-color: rgba(34,211,238,0.3);
+    }
+
+    .fact-item .num {
+      font-family: 'Orbitron', monospace;
+      font-size: 42px;
+      color: var(--cyan);
+      opacity: 0.18;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .fact-item p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .fact-item p strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 50px 24px;
+      background: var(--bg1);
+      border-top: 1px solid rgba(139,92,246,0.25);
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    footer p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .footer-divider {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      margin: 18px auto;
+      border-radius: 10px;
+    }
+
+    /* ── UTILITY ── */
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .stagger > * {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0.05s; }
+    .stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.1s; }
+    .stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.15s; }
+    .stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.2s; }
+    .stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.25s; }
+    .stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.3s; }
+    .stagger.visible > *:nth-child(7) { opacity:1; transform:none; transition-delay:0.35s; }
+    .stagger.visible > *:nth-child(8) { opacity:1; transform:none; transition-delay:0.4s; }
+
+    @media (max-width: 600px) {
+      .quiz-options { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 34px; }
+      .nav-dots { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ STARFIELD CANVAS ══ -->
+  <div id="starfield"></div>
+
+  <!-- ══ NAV DOTS ══ -->
+  <nav class="nav-dots" id="navDots"></nav>
+
+  <div class="wrapper">
+
+    <!-- ══ HERO ══ -->
+    <header class="hero" id="s0">
+      <div class="hero-badge">✦ Interactive Learning Experience ✦</div>
+      <h1>🚀 <span>Galaxy</span><br>Explorer</h1>
+      <p>Blast off on a journey through galaxies, planets, and the most mind-bending wonders of outer space!</p>
+      <div class="hero-cta">
+        <a href="#galaxies" class="btn btn-primary">Start Exploring 🌌</a>
+        <a href="#quiz" class="btn btn-secondary">Take the Quiz 🎮</a>
+      </div>
+    </header>
+
+    <!-- ══ WHAT IS A GALAXY ══ -->
+    <div class="bg-section" id="s1">
+      <div class="section reveal" id="galaxies">
+        <p class="section-label">Chapter 01</p>
+        <h2 class="section-title">🌌 What is a Galaxy?</h2>
+        <hr class="divider">
+
+        <p class="section-desc">A <strong>galaxy</strong> is a colossal collection of gas, dust, and billions of stars all held together by gravity. Think of it like a giant city of stars floating in the darkness of space!</p>
+
+        <p class="section-desc">Our own galaxy is called the <strong>Milky Way</strong>. It holds over <strong>200 billion stars</strong> — including our very own Sun! 🌞</p>
+
+        <p class="section-desc">Scientists estimate there are <strong>2 trillion galaxies</strong> in the observable universe. That's more than the number of grains of sand on all of Earth's beaches combined!</p>
+
+        <div class="fun-fact">
+          🤯 <strong>Mind-Bender:</strong> If you could travel at the speed of light — that's 299,792 km every single second — it would <em>still</em> take <strong>100,000 years</strong> to cross the Milky Way from one side to the other!
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SOLAR SYSTEM ══ -->
+    <div class="section reveal" id="s2">
+      <p class="section-label">Chapter 02</p>
+      <h2 class="section-title">☀️ Our Solar System</h2>
+      <hr class="divider">
+      <p class="section-desc">Eight incredible planets orbit our Sun — here they are, from closest to farthest away. Hover over them to explore!</p>
+
+      <div class="planets-grid stagger">
+
+        <div class="planet-card" style="--glow:rgba(249,115,22,0.4);">
+          <span class="planet-icon">🌑</span>
+          <h3 style="color:#f97316;">Mercury</h3>
+          <p>Smallest planet, closest to the Sun. No moons, almost no atmosphere, and extreme temperature swings.</p>
+          <span class="planet-order">01 · Closest</span>
+        </div>
+
+        <div class="planet-card" style="--glow:rgba(251,191,36,0.4);">
+          <span class="planet-icon">🌕</span>
+          <h3 style="color:#fbbf24;">Venus</h3>
+          <p>The hottest planet! Thick acid clouds trap heat, and it spins backwards compared to most planets.</p>
+          <span class="planet-order">02 · from Sun</span>
+        </div>
+
+        <div class="planet-card" style="--glow:rgba(34,197,94,0.4);">
+          <span class="planet-icon">🌍</span>
+          <h3 style="color:#22c55e;">Earth</h3>
+          <p>Our home and the only known planet with life! Perfect conditions, liquid water, and one Moon.</p>
+          <span class="planet-order">03 · Home 🏠</span>
+        </div>
+
+        <div class="planet-card" style="--glow:rgba(239,68,68,0.4);">
+          <span class="planet-icon">🔴</span>
+          <h3 style="color:#ef4444;">Mars</h3>
+          <p>The Red Planet! Home to Olympus Mons — a volcano three times taller than Mount Everest!</p>
+          <span class="planet-order">04 · from Sun</span>
+        </div>
+
+        <div class="planet-card" style="--glow:rgba(251,146,60,0.4);">
+          <span class="planet-icon">🟠</span>
+          <h3 style="color:#fb923c;">Jupiter</h3>
+          <p>King of the planets! Over 1,300 Earths fit inside it. Its Great Red Spot is a storm older than 350 years!</p>
+          <span class="planet-order">05 · Giant</span>
+        </div>
+
+        <div class="planet-card" style="--glow:rgba(253,224,71,0.4);">
+          <span class="planet-icon">🪐</span>
+          <h3 style="color:#fde047;">Saturn</h3>
+          <p>Famous for stunning rings of ice and rock. So light it could float on water — if you had a big enough ocean!</p>
+          <span class="planet-order">06 · Ringed</span>
+        </div>
+
+        <div class="planet-card" style="--glow:rgba(34,211,238,0.4);">
+          <span class="planet-icon">🔵</span>
+          <h3 style="color:#22d3ee;">Uranus</h3>
+          <p>An ice giant that spins on its side! Its rings go up and down, not around the middle like Saturn's.</p>
+          <span class="planet-order">07 · Tilted</span>
+        </div>
+
+        <div class="planet-card" style="--glow:rgba(96,165,250,0.4);">
+          <span class="planet-icon">🌐</span>
+          <h3 style="color:#60a5fa;">Neptune</h3>
+          <p>The windiest planet in the solar system — winds reach 2,100 km/h, faster than the speed of sound!</p>
+          <span class="planet-order">08 · Farthest</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ GALAXY TYPES ══ -->
+    <div class="bg-section" id="s3">
+      <div class="section reveal" id="types">
+        <p class="section-label">Chapter 03</p>
+        <h2 class="section-title">🔭 Types of Galaxies</h2>
+        <hr class="divider">
+        <p class="section-desc">Not all galaxies look the same! Scientists classify them into three main shapes based on how they appear from Earth.</p>
+
+        <div class="types-grid stagger">
+
+          <div class="type-card spiral">
+            <span class="type-icon">🌀</span>
+            <h3 style="color:#a78bfa;">Spiral Galaxies</h3>
+            <p>These look like enormous pinwheels with curved arms sweeping out from a bright center. Our own Milky Way is a barred spiral galaxy! About 60% of all known galaxies are spirals.</p>
+          </div>
+
+          <div class="type-card elliptical">
+            <span class="type-icon">🥚</span>
+            <h3 style="color:#fb923c;">Elliptical Galaxies</h3>
+            <p>Shaped like stretched spheres or ovals — some look like footballs! They are the largest type of galaxy and are packed with old, reddish stars with very little dust or new star formation.</p>
+          </div>
+
+          <div class="type-card irregular">
+            <span class="type-icon">✨</span>
+            <h3 style="color:#4ade80;">Irregular Galaxies</h3>
+            <p>These have no recognizable shape at all — completely chaotic and jumbled up! They often form when two galaxies collide with each other and their gravity rips everything apart.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ QUIZ ══ -->
+    <div class="section reveal" id="quiz">
+      <p class="section-label">Chapter 04</p>
+      <h2 class="section-title">🎮 Space Quiz!</h2>
+      <hr class="divider">
+      <p class="section-desc">Think you've been paying attention? Test your galaxy knowledge and earn your astronaut badge!</p>
+
+      <div class="quiz-shell">
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="quiz-box" id="quizBox">
+          <div class="quiz-header">
+            <span class="quiz-score-badge">⭐ Score: <span id="score">0</span></span>
+            <span class="quiz-counter">Q<span id="qNum">1</span> / 8</span>
+          </div>
+
+          <div id="quiz-question">Loading…</div>
+          <div class="quiz-options" id="quiz-options"></div>
+          <div id="quiz-feedback"></div>
+          <button id="quiz-next" onclick="nextQuestion()" disabled>Next Question ➡</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ COOL FACTS ══ -->
+    <div class="bg-section" id="s5">
+      <div class="section reveal">
+        <p class="section-label">Chapter 05</p>
+        <h2 class="section-title">🤩 Mind-Blowing Space Facts</h2>
+        <hr class="divider">
+        <p class="section-desc">The universe is full of jaw-dropping surprises. Here are six that will make your brain spin!</p>
+
+        <div class="facts-grid stagger">
+
+          <div class="fact-item">
+            <div class="num">01</div>
+            <p><strong>There's no sound in space.</strong> Sound waves need air to travel. Space is a near-perfect vacuum — totally silent!</p>
+          </div>
+
+          <div class="fact-item">
+            <div class="num">02</div>
+            <p><strong>A day on Venus</strong> is longer than a year on Venus. It spins so slowly that it takes longer to rotate once than to orbit the Sun!</p>
+          </div>
+
+          <div class="fact-item">
+            <div class="num">03</div>
+            <p><strong>Neutron stars</strong> are incredibly dense — a single teaspoon of neutron star material would weigh around <strong>10 billion tonnes</strong>!</p>
+          </div>
+
+          <div class="fact-item">
+            <div class="num">04</div>
+            <p><strong>The Sun makes up 99.86%</strong> of all the mass in our entire Solar System. Everything else — planets, moons, asteroids — is just 0.14%!</p>
+          </div>
+
+          <div class="fact-item">
+            <div class="num">05</div>
+            <p><strong>Black holes</strong> are regions where gravity is so powerful that nothing — not even light — can ever escape once it crosses the event horizon.</p>
+          </div>
+
+          <div class="fact-item">
+            <div class="num">06</div>
+            <p><strong>Moon footprints</strong> left by Apollo astronauts will stay there for millions of years — there's no wind, weather, or water to wash them away!</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FOOTER ══ -->
+    <footer>
+      <div class="footer-logo">🚀 Galaxy Explorer</div>
+      <div class="footer-divider"></div>
+      <p>Made for curious young astronauts everywhere ✨</p>
+      <p style="margin-top:6px; font-size:13px;">Keep exploring — the universe has no limits!</p>
+    </footer>
+
+  </div><!-- /wrapper -->
+
+
+  <!-- ══ JAVASCRIPT ══ -->
+  <script>
+
+    /* ── BUILD STARFIELD ── */
+    (function() {
+      var sf = document.getElementById('starfield');
+      for (var i = 0; i < 180; i++) {
+        var s = document.createElement('div');
+        s.className = 'star';
+        var size = Math.random() * 2.5 + 0.5;
+        s.style.cssText = [
+          'width:'  + size + 'px',
+          'height:' + size + 'px',
+          'left:'   + Math.random() * 100 + '%',
+          'top:'    + Math.random() * 100 + '%',
+          '--dur:'  + (Math.random() * 4 + 2) + 's',
+          '--delay:'+ (Math.random() * 5) + 's'
+        ].join(';');
+        sf.appendChild(s);
+      }
+      for (var j = 0; j < 5; j++) {
+        var sh = document.createElement('div');
+        sh.className = 'shoot';
+        sh.style.cssText = [
+          'left:'    + (Math.random() * 80 + 10) + '%',
+          'top:'     + (Math.random() * 40) + '%',
+          '--sd:'    + (Math.random() * 3 + 3) + 's',
+          '--sdelay:'+ (Math.random() * 8) + 's'
+        ].join(';');
+        sf.appendChild(sh);
+      }
+    })();
+
+    /* ── SCROLL REVEAL ── */
+    var reveals = document.querySelectorAll('.reveal');
+    var staggers = document.querySelectorAll('.stagger');
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    reveals.forEach(function(el) { observer.observe(el); });
+    staggers.forEach(function(el) { observer.observe(el); });
+
+    /* ── NAV DOTS ── */
+    var sections = ['s0','s1','s2','s3','quiz','s5'];
+    var navDots = document.getElementById('navDots');
+
+    sections.forEach(function(id, i) {
+      var dot = document.createElement('div');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = function() {
+        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+      };
+      navDots.appendChild(dot);
+    });
+
+    window.addEventListener('scroll', function() {
+      var scrollY = window.scrollY;
+      var dots = document.querySelectorAll('.nav-dot');
+      sections.forEach(function(id, i) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var top = el.getBoundingClientRect().top + scrollY - 200;
+        var bottom = top + el.offsetHeight;
+        if (scrollY >= top && scrollY < bottom) {
+          dots.forEach(function(d) { d.classList.remove('active'); });
+          dots[i].classList.add('active');
+        }
+      });
+    });
+
+    /* ── QUIZ ── */
+    var questions = [
+      { q: "🌌 What is the name of our galaxy?",            opts: ["Andromeda", "Milky Way", "Triangulum", "Whirlpool"], ans: 1 },
+      { q: "☀️ Which planet is closest to the Sun?",        opts: ["Venus", "Mars", "Mercury", "Earth"],                ans: 2 },
+      { q: "🪐 Which planet has the most famous rings?",    opts: ["Jupiter", "Neptune", "Uranus", "Saturn"],           ans: 3 },
+      { q: "🔴 Which planet is called the 'Red Planet'?",   opts: ["Mercury", "Mars", "Venus", "Jupiter"],              ans: 1 },
+      { q: "🌀 What shape is the Milky Way galaxy?",        opts: ["Elliptical", "Irregular", "Spiral", "Circular"],    ans: 2 },
+      { q: "🌍 How many planets are in our Solar System?",  opts: ["7", "9", "10", "8"],                                ans: 3 },
+      { q: "⚡ Which planet has the fastest winds?",        opts: ["Saturn", "Jupiter", "Neptune", "Uranus"],           ans: 2 },
+      { q: "🌟 What is at the center of our Solar System?", opts: ["The Moon", "Earth", "Jupiter", "The Sun"],          ans: 3 }
+    ];
+
+    var currentQ = 0, score = 0, answered = false;
+
+    function updateProgress() {
+      var pct = (currentQ / questions.length) * 100;
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('qNum').textContent = Math.min(currentQ + 1, questions.length);
+    }
+
+    function loadQuestion() {
+      if (currentQ >= questions.length) { showResult(); return; }
+      answered = false;
+      var q = questions[currentQ];
+      document.getElementById('quiz-question').textContent = q.q;
+      document.getElementById('quiz-feedback').textContent = '';
+      document.getElementById('quiz-feedback').style.color = '';
+      document.getElementById('quiz-next').disabled = true;
+      updateProgress();
+
+      var container = document.getElementById('quiz-options');
+      container.innerHTML = '';
+      q.opts.forEach(function(opt, i) {
+        var btn = document.createElement('button');
+        btn.className = 'quiz-opt';
+        btn.textContent = opt;
+        btn.onclick = function() { checkAnswer(i, btn); };
+        container.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(chosen, btn) {
+      if (answered) return;
+      answered = true;
+      document.getElementById('quiz-next').disabled = false;
+
+      var allBtns = document.querySelectorAll('.quiz-opt');
+      allBtns.forEach(function(b) { b.disabled = true; });
+
+      var correct = questions[currentQ].ans;
+      if (chosen === correct) {
+        btn.className = 'quiz-opt correct';
+        score++;
+        document.getElementById('score').textContent = score;
+        document.getElementById('quiz-feedback').textContent = '🎉 Correct! Fantastic work!';
+        document.getElementById('quiz-feedback').style.color = '#4ade80';
+      } else {
+        btn.className = 'quiz-opt wrong';
+        allBtns[correct].className = 'quiz-opt correct';
+        document.getElementById('quiz-feedback').textContent = '❌ Not quite! The right answer is highlighted green.';
+        document.getElementById('quiz-feedback').style.color = '#fca5a5';
+      }
+    }
+
+    function nextQuestion() {
+      if (!answered) return;
+      currentQ++;
+      loadQuestion();
+    }
+
+    function showResult() {
+      document.getElementById('progressFill').style.width = '100%';
+      var pct = score / questions.length;
+      var stars = pct >= 0.875 ? '🌟🌟🌟' : pct >= 0.625 ? '⭐⭐' : '⭐';
+      var title = pct >= 0.875 ? 'Galaxy Master!' : pct >= 0.625 ? 'Space Cadet!' : 'Keep Exploring!';
+      var msg   = pct >= 0.875 ? 'Out of this world! You really know your space stuff!' :
+                  pct >= 0.625 ? 'Great job! A few more facts and you\'ll be an expert!' :
+                                 'Don\'t worry — read through the sections and try again!';
+
+      document.getElementById('quizBox').innerHTML =
+        '<div class="quiz-result">' +
+          '<div class="result-stars">' + stars + '</div>' +
+          '<div class="result-score">' + score + ' / 8</div>' +
+          '<div class="result-label">' + title + '</div>' +
+          '<div class="result-msg">' + msg + '</div>' +
+          '<button class="btn btn-primary" onclick="resetQuiz()" style="font-family:Orbitron,monospace;font-size:13px;letter-spacing:1px;">🔄 Play Again</button>' +
+        '</div>';
+    }
+
+    function resetQuiz() {
+      currentQ = 0; score = 0; answered = false;
+      document.getElementById('quizBox').innerHTML =
+        '<div class="quiz-header">' +
+          '<span class="quiz-score-badge">⭐ Score: <span id="score">0</span></span>' +
+          '<span class="quiz-counter">Q<span id="qNum">1</span> / 8</span>' +
+        '</div>' +
+        '<div id="quiz-question"></div>' +
+        '<div class="quiz-options" id="quiz-options"></div>' +
+        '<div id="quiz-feedback"></div>' +
+        '<button id="quiz-next" onclick="nextQuestion()" disabled>Next Question ➡</button>';
+      loadQuestion();
+    }
+
+    loadQuestion();
+
+  </script>
+</body>
+</html>
